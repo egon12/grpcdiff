@@ -1,7 +1,11 @@
 package grpcdiff
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
+	"io/ioutil"
+	"os"
 	"time"
 
 	"github.com/sergi/go-diff/diffmatchpatch"
@@ -35,7 +39,8 @@ func NewReport(input string, resA, resB []byte, durA, durB time.Duration) *Repor
 
 func (r *Report) Report() string {
 	if r.HasDiff() {
-		return fmt.Sprintf("input %s has diff: %s", r.input, r.GetFormattedDiff())
+		filenameA, filenameB := r.WriteResToFile()
+		return fmt.Sprintf("input %s has diff that you can see at %s and %s", r.input, filenameA, filenameB)
 	}
 	return fmt.Sprintf("input %s: %s", r.input, r.GetDurationAnalysis())
 }
@@ -76,4 +81,26 @@ func (r *Report) GetDurationAnalysis() string {
 	}
 
 	return "duration is quite same"
+}
+
+func (r *Report) WriteResToFile() (filenameA, filenameB string) {
+	filename := r.generateFileName()
+	filenameA = filename + "-A.json"
+	filenameB = filename + "-B.json"
+	r.writeFile(filenameA, r.resA)
+	r.writeFile(filenameB, r.resB)
+	return
+}
+
+func (r *Report) writeFile(filename string, content []byte) {
+	err := ioutil.WriteFile(filename, content, os.ModePerm)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (r *Report) generateFileName() string {
+	randBytes := make([]byte, 16)
+	rand.Read(randBytes)
+	return hex.EncodeToString(randBytes)
 }
