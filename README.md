@@ -4,7 +4,7 @@ Tools to see different betweenr two different GRPC implementation with same inte
 ## How to install?
 If you have go in your environment you can use
 ```
-go install github.com/egon12/grpcdiff
+go install github.com/egon12/grpcdiff/cmd/grpcdiff
 ```
 
 ## How to use it?
